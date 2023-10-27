@@ -3,24 +3,43 @@ class Family:
         self.hash = father+mother
         self.mother = mother
         self.father = father
-        self.children = []
+        self.children = {}
 
-        self.mother.addFamilly(self)
-        self.father.addFamilly(self)
-
-    def addChildren(self,child):
-        self.children.append(child)
-        child.mother = self.mother
-        child.father = child.father
+        self.mother.lower = self.hash
+        self.father.lower = self.hash
     
-    def getSummary(self):
-        summary = f"Father: {self.father.name}-------{self.mother.name} :Mother\nChildren: "
+    def addChildren(self,child):
+        if child.upper:
+            print("ERROR: Child is already part of family:" + child.upper)
+            return False
+        
+        self.children[child.hash] = child.hash
+        child.upper = self.hash
+    def getJsonObj(self):
+        jsonObj = {
+            'key':self.hash,
+            'Father':self.father,
+            'Mother':self.mother,
+            'Children': self.children
+        }
 
-        for child in self.children:
-            summary = summary + child.name + ", "
-
-        return summary[0:len(summary)-2] + "\n"
 
 
 
+"""
+family json
+{
+    hash:sdfasdcawef
+    Father: father's hash
+    Mother: mother's hash
+    children: {child1'hash:child1'hash, child2'hash:child2'hash}
+}
 
+family_data.json 
+family hash: {
+    hash:sdfasdcawef
+    Father: father's hash
+    Mother: mother's hash
+    children: {child1'hash:child1'hash, child2'hash:child2'hash}
+}
+"""
