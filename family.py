@@ -1,45 +1,97 @@
-class Family:
-    def __init__(self,father,mother):
-        self.hash = father+mother
-        self.mother = mother
-        self.father = father
-        self.children = {}
+import hashlib
+import pickle
 
-        self.mother.lower = self.hash
-        self.father.lower = self.hash
-    
-    def addChildren(self,child):
-        if child.upper:
-            print("ERROR: Child is already part of family:" + child.upper)
-            return False
-        
-        self.children[child.hash] = child.hash
-        child.upper = self.hash
-    def getJsonObj(self):
-        jsonObj = {
-            'key':self.hash,
-            'Father':self.father,
-            'Mother':self.mother,
-            'Children': self.children
-        }
+persons = {}
+pckl_file_path = 'datafile.pkl'
+
+try:
+    with open(pckl_file_path, 'rb') as file:
+        persons = pickle.load(file)
+except EOFError:
+    print("Pickle file is empty.")
+except Exception as e:
+    print(f"An error occurred: {e}")
 
 
 
+def getHash(str):
+    sha256_hash = hashlib.sha256()
+    sha256_hash.update(str.encode())
+    return sha256_hash.hexdigest()
 
-"""
-family json
-{
-    hash:sdfasdcawef
-    Father: father's hash
-    Mother: mother's hash
-    children: {child1'hash:child1'hash, child2'hash:child2'hash}
-}
+def person(name, DOB, father, mother):
+	sha256_hash = hashlib.sha256()
+	sha256_hash.update(name.encode())
+	hash_result = sha256_hash.hexdigest()
 
-family_data.json 
-family hash: {
-    hash:sdfasdcawef
-    Father: father's hash
-    Mother: mother's hash
-    children: {child1'hash:child1'hash, child2'hash:child2'hash}
-}
-"""
+	hash_result =getHash(name)
+
+	if hash_result in persons:
+		print(f"ERROR: Person already exist: {name}.")
+		return "ERROR: Person already exist."
+
+	newPerson = {
+		'ID':hash_result,
+		'name': name,
+		'dob': DOB,
+		'fatherID':father,
+		'motherID':mother
+	}
+
+
+	print(f"New Person: {name}")
+	persons[newPerson["ID"]] = newPerson
+	return newPerson["ID"]
+
+def getPerson(personID):
+	if personID in persons:
+		return persons[personID]
+	else:
+		print("ERORR: In getPersons().")
+		return "ERORR: In getPersons()."
+def getPersonID(name):
+	key = getHash(name)
+	print(key)
+	if key in persons:
+		return key
+	print("ERROR: Person does NOT exist.")
+	return "ERROR: Person does NOT exist."
+def addFather(childID,fatherID):
+	persons[childID].faher = fatherID
+
+def getMotherID(childID):
+	if childID in persons:
+		return persons[childID]['motherID'] 
+	else:
+		return f"ERROR Person With {childID} NOT Found."
+def getFatherID(childID):
+	if childID in persons:
+		return persons[childID]['fatherID'] 
+	else:
+		return f"ERROR Person With {childID} NOT Found."
+
+
+def getChildren(parentID):
+	print(parentID)
+	children = []
+	for key in persons:
+		child = persons[key]
+		if child["fatherID"] == parentID or child["motherID"] == parentID:
+			children.append(child['ID'])
+
+	return children
+
+def printALL():
+	print("ALL PEOPLE:")
+	for key in persons:
+		print(persons[key]['name'])
+
+
+
+
+
+
+printALL()
+
+with open('datafile.pkl', 'wb') as file:
+    pickle.dump(persons, file)
